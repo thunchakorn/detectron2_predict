@@ -1,5 +1,6 @@
 import cv2
 import os
+import numpy as np
 
 import detectron2
 from detectron2 import model_zoo
@@ -12,8 +13,8 @@ class INV_layout(object):
         self.thres = thres
         self.thing_classes = ['DocType', 'Item', 'Payment', 'Reciever', 'Remark',
                         'Sender', 'Signature', 'Summary', 'Table']
-
-        weight = os.path.join('./weight', os.listdir('//weight')[0])
+        print(os.getcwd())
+        weight = os.path.join('./weight', os.listdir('./weight')[0])
         config_file = 'COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x.yaml'
         cfg = get_cfg()
         cfg.merge_from_file(model_zoo.get_config_file(config_file))
@@ -22,7 +23,7 @@ class INV_layout(object):
         cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(self.thing_classes)
         self.predictor = DefaultPredictor(cfg)
 
-    def find_polygon(self, mask, s = 0.005):
+    def find_polygon(self, mask, percent = 0.005):
         mask = np.uint8(mask)
         contour, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         eps = percent * cv2.arcLength(contour[0], True)
@@ -30,7 +31,7 @@ class INV_layout(object):
         return out_curve.reshape(-1,2).tolist()
 
     def predict(self, img, thresh = 0.5):
-        predictor.model.roi_heads.box_predictor.test_score_thresh = thresh
+        self.predictor.model.roi_heads.box_predictor.test_score_thresh = thresh
         output = self.predictor(img)['instances'].to("cpu")
         instance = output.get_fields()
         imageHeight = output.image_size[0]
@@ -39,8 +40,8 @@ class INV_layout(object):
         for pred, mask, score, bbox in zip(instance['pred_classes'].numpy(),
                                         instance['pred_masks'].numpy(),
                                         instance['scores'].numpy(),
-                                        instance['pred_boxes']):
-            polygon = find_polygon(mask)
+                                        instance['pred_boxes'].tensor.cpu().numpy()):
+            polygon = self.find_polygon(mask)
             dict_predict = {
                             'label':self.thing_classes[pred],
                             'points':polygon,

@@ -26,9 +26,10 @@ text_detecion_engine = INV_layout()
 # process an image to get ctpn box
 def process(image_file, thresh = 0.5):
     img = cv2.imread(image_file)
-    results = INV_layout.predict(img=img, thesh = thresh)
+    results = text_detecion_engine.predict(img=img, thresh = thresh)
     results = json.loads(json.dumps(results))
     return results
+
 
 
 def fn_on_request(fn_process):

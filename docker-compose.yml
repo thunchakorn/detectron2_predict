@@ -1,6 +1,6 @@
 version: '2.3'
 services:
-    rabbit:
+    rabbit-mq:
         image: rabbitmq:3-management
         ports:
             - "8010:15672"
@@ -30,8 +30,20 @@ services:
         networks:
             - ztrus_net
         depends_on:
-            - rabbit
+            - rabbit-mq
         command:
             python3 app.py
+    client:
+        image:
+            wnuttachai/ubuntu18.04:base
+        volumes:
+            - "./:/app"
+        networks:
+            - ztrus_net
+        command:
+            tail -f /dev/null
+        environment:
+            TZ: Asia/Bangkok
+        
 networks:
     ztrus_net:
