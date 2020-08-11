@@ -1,19 +1,27 @@
+# coding=utf-8
+import os
+import shutil
+import sys
+import time
+
+import cv2
+import numpy as np
+
+sys.path.append(os.getcwd())
+
+
 import amqpstorm
-
 from amqpstorm import Message
+import uuid
+import json
 
-
-class FibonacciRpcClient(object):
-    def __init__(self, host, username, password):
+class RpcClient(object):
+    def __init__(self, host):
         """
         :param host: RabbitMQ Server e.g. localhost
-        :param username: RabbitMQ Username e.g. guest
-        :param password: RabbitMQ Password e.g. guest
         :return:
         """
         self.host = host
-        self.username = username
-        self.password = password
         self.channel = None
         self.response = None
         self.connection = None
@@ -22,9 +30,7 @@ class FibonacciRpcClient(object):
         self.open()
 
     def open(self):
-        self.connection = amqpstorm.Connection(self.host,
-                                               self.username,
-                                               self.password)
+        self.connection = amqpstorm.UriConnection(self.host)  
 
         self.channel = self.connection.channel()
 
@@ -39,27 +45,24 @@ class FibonacciRpcClient(object):
         self.channel.close()
         self.connection.close()
 
-    def call(self, number):
+    def call(self, routing_key,**kargs):
         self.response = None
-        message = Message.create(self.channel, body=str(number))
+        # create message
+        message = json.dumps(kargs,ensure_ascii=False)
+        message = Message.create(self.channel, body=message)
         message.reply_to = self.callback_queue
         self.correlation_id = message.correlation_id
-        message.publish(routing_key='rpc_queue')
 
+        # publish to rabbit-mq
+        message.publish(routing_key=routing_key)
+
+        # waiting
         while not self.response:
             self.channel.process_data_events()
-        return int(self.response)
+
+        return json.loads(self.response)
 
     def _on_response(self, message):
         if self.correlation_id != message.correlation_id:
             return
         self.response = message.body
-
-
-if __name__ == '__main__':
-    FIBONACCI_RPC = FibonacciRpcClient('rabbit', 'user', 'public')
-
-    print(" [x] Requesting fib(30)")
-    RESPONSE = FIBONACCI_RPC.call(30)
-    print(" [.] Got %r" % (RESPONSE,))
-    FIBONACCI_RPC.close()

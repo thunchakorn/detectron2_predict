@@ -41,11 +41,7 @@ RUN python -m pip install 'git+https://github.com/facebookresearch/detectron2.gi
 ENV FVCORE_CACHE="/tmp"
 WORKDIR /app/
 
-COPY train_util.py ./
-COPY main.py .
 COPY ./ ./
 # install requirements libraries for training
 RUN python -m pip install -r requirements.txt
 
-
-# ENTRYPOINT ["python", "main.py"]

@@ -1,14 +1,5 @@
-version: '3'
+version: '2.3'
 services:
-    client:
-        image: wnuttachai/ubuntu18.04:base
-        container_name: client
-        ports:
-            - "5000:80"
-        volumes: 
-            - "./:/app"
-        command: 
-            tail -F /dev/null
     rabbit:
         image: rabbitmq:3-management
         ports:
@@ -17,14 +8,30 @@ services:
         environment: 
             RABBITMQ_DEFAULT_USER: user
             RABBITMQ_DEFAULT_PASS: public
+            TZ: Asia/Bangkok
         restart: always
-    server:
+        container_name: rabbit-mq
+        hostname: rabbit-mq
+        networks:
+            - ztrus_net
+    invoice-layout-detection:
         build:
-            ./server
-        container_name: detectron2_predict_server
-        ports:
-            - "5001:80"
+            .
+        container_name: invoice-layout-detection
+        hostname: invoice-layout-detection
+        restart: always
+        runtime: nvidia
         volumes:
-            - "./:/app"
-        command: 
-            tail -F /dev/null
+            - "./images/:/images"
+        environment:
+            TZ: Asia/Bangkok
+            RPC_HOST: amqp://user:public@rabbit-mq:5672/%2F?heartbeat=120
+            RPC_KEY: layout_detection
+        networks:
+            - ztrus_net
+        depends_on:
+            - rabbit
+        command:
+            python3 app.py
+networks:
+    ztrus_net:
