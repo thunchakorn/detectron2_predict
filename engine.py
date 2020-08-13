@@ -7,14 +7,16 @@ from detectron2 import model_zoo
 from detectron2.config import get_cfg
 from detectron2.engine import DefaultPredictor
 
+WEIGHT_PATH = os.environ.get('WEIGHT_PATH')
+
 class INV_layout(object):
     def __init__(self, thres = 0.5):
 
         self.thres = thres
         self.thing_classes = ['DocType', 'Item', 'Payment', 'Reciever', 'Remark',
                         'Sender', 'Signature', 'Summary', 'Table']
-        print(os.getcwd())
-        weight = os.path.join('./weight', os.listdir('./weight')[0])
+
+        weight = os.path.join(WEIGHT_PATH, os.listdir(WEIGHT_PATH)[0])
         config_file = 'COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x.yaml'
         cfg = get_cfg()
         cfg.merge_from_file(model_zoo.get_config_file(config_file))

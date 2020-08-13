@@ -9,7 +9,6 @@ import numpy as np
 
 sys.path.append(os.getcwd())
 
-
 import amqpstorm
 from amqpstorm import Message
 import uuid

@@ -22,11 +22,12 @@ services:
         restart: always
         runtime: nvidia
         volumes:
-            - "./images/:/images"
+            - "./images/:/app/images"
         environment:
             TZ: Asia/Bangkok
             RPC_HOST: amqp://user:public@rabbit-mq:5672/%2F?heartbeat=120
             RPC_KEY: layout_detection
+            WEIGHT_PATH: ./weight/
         networks:
             - ztrus_net
         depends_on:
@@ -44,6 +45,6 @@ services:
             tail -f /dev/null
         environment:
             TZ: Asia/Bangkok
-        
+
 networks:
     ztrus_net:
