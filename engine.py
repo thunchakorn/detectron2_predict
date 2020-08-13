@@ -10,9 +10,8 @@ from detectron2.engine import DefaultPredictor
 WEIGHT_PATH = os.environ.get('WEIGHT_PATH')
 
 class INV_layout(object):
-    def __init__(self, thres = 0.5):
+    def __init__(self, cuda = False):
 
-        self.thres = thres
         self.thing_classes = ['DocType', 'Item', 'Payment', 'Reciever', 'Remark',
                         'Sender', 'Signature', 'Summary', 'Table']
 
@@ -21,7 +20,8 @@ class INV_layout(object):
         cfg = get_cfg()
         cfg.merge_from_file(model_zoo.get_config_file(config_file))
         cfg.MODEL.WEIGHTS = weight
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = self.thres
+        if not cuda:
+            cfg.MODEL.DEVICE = 'cpu'
         cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(self.thing_classes)
         self.predictor = DefaultPredictor(cfg)
 

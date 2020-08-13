@@ -1,0 +1,50 @@
+version: '2.3'
+services:
+    rabbit-mq:
+        image: rabbitmq:3-management
+        ports:
+            - "8010:15672"
+            - "5671-5672:5671-5672"
+        environment: 
+            RABBITMQ_DEFAULT_USER: user
+            RABBITMQ_DEFAULT_PASS: public
+            TZ: Asia/Bangkok
+        restart: always
+        container_name: rabbit-mq
+        hostname: rabbit-mq
+        networks:
+            - ztrus_net
+    invoice-layout-detection-cpu:
+        build:
+            context: ./
+            dockerfile: Dockerfile-cpu
+        container_name: invoice-layout-detection
+        hostname: invoice-layout-detection
+        restart: always
+        volumes:
+            - "./images/:/app/images"
+        environment:
+            TZ: Asia/Bangkok
+            RPC_HOST: amqp://user:public@rabbit-mq:5672/%2F?heartbeat=120
+            RPC_KEY: layout_detection
+            WEIGHT_PATH: ./weight/
+        networks:
+            - ztrus_net
+        depends_on:
+            - rabbit-mq
+        command:
+            python3 app.py
+    client:
+        image:
+            wnuttachai/ubuntu18.04:base
+        volumes:
+            - "./:/app"
+        networks:
+            - ztrus_net
+        command:
+            tail -f /dev/null
+        environment:
+            TZ: Asia/Bangkok
+
+networks:
+    ztrus_net:

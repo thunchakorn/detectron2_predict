@@ -10,7 +10,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--image', help = 'image path', required=True)
     args = parser.parse_args()
 
-    RPC_HOST = "amqp://user:public@rabbit-mq:5672/"
+    RPC_HOST = "amqp://user:public@0.0.0.0:5672/"
 
     # Input file in container
     input_filename = args.image

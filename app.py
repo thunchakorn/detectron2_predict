@@ -3,6 +3,7 @@ import cv2
 from engine import INV_layout
 import json
 import sys
+import torch
 
 import amqpstorm
 from amqpstorm import Message
@@ -15,21 +16,21 @@ from amqpstorm import Message
 # Environment varaible 
 RPC_HOST=os.environ.get('RPC_HOST')
 RPC_KEY=os.environ.get('RPC_KEY')
+is_cuda = torch.cuda.is_available()
 
 print("MQ Host: {}".format(RPC_HOST))
 print("MQ Key: {}".format(RPC_KEY))
 
-# Load model from tensorflow
-text_detecion_engine = INV_layout()
-
+# Load model
+text_detecion_engine = INV_layout(cuda = is_cuda)
 
 # process an image to get ctpn box
 def process(image_file, thresh = 0.5):
     img = cv2.imread(image_file)
+    print(img.shape)
     results = text_detecion_engine.predict(img=img, thresh = thresh)
     results = json.loads(json.dumps(results))
     return results
-
 
 
 def fn_on_request(fn_process):
