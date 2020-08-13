@@ -44,9 +44,9 @@ class INV_layout(object):
             polygon = self.find_polygon(mask)
             dict_predict = {
                             'label':self.thing_classes[pred],
-                            'points':polygon,
-                            'bbox':bbox,
-                            'score':score
+                            'points':polygon.tolist(),
+                            'bbox':bbox.tolist(),
+                            'score':score.tolist()
                             }
             results.append(dict_predict)
         return results
