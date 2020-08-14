@@ -8,7 +8,6 @@ import torch
 import amqpstorm
 from amqpstorm import Message
 
-
 #RPC_HOST = amqp://user:public@ocr-mq:5672/
 #RPC_HOST = amqp://user:public@localhost:5672/
 #RPC_KEY = ztrus_ctpn
