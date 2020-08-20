@@ -12,6 +12,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     RPC_HOST = "amqp://user:public@0.0.0.0:5672/"
+    ROC_KEY = 'inv-layout'
 
     # Input file in container
     # examp
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     print("Test calling layout detection")
     messages = {'image_file':input_filename,
                 'thresh':0.5}
-    results = engine.call('layout_detection',**messages)
+    results = engine.call(ROC_KEY, **messages)
 
     # Draw Images
     print('visualising')

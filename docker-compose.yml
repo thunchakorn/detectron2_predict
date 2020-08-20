@@ -14,19 +14,18 @@ services:
         hostname: rabbit-mq
         networks:
             - ztrus_net
-    invoice-layout-detection:
-        build:
-            .
-        container_name: invoice-layout-detection
-        hostname: invoice-layout-detection
+    inv-layout:
+        image: thunchakorn/inv-layout:gpu
+        container_name: inv-layout
+        hostname: inv-layout
         restart: always
-        runtime: nvidia
         volumes:
             - "./images/:/app/images"
+            - "./weight/:/app/weight"
         environment:
             TZ: Asia/Bangkok
             RPC_HOST: amqp://user:public@rabbit-mq:5672/%2F?heartbeat=120
-            RPC_KEY: layout_detection
+            RPC_KEY: inv-layout
             WEIGHT_PATH: ./weight/
         networks:
             - ztrus_net
@@ -34,17 +33,6 @@ services:
             - rabbit-mq
         command:
             python3 app.py
-    client:
-        image:
-            wnuttachai/ubuntu18.04:base
-        volumes:
-            - "./:/app"
-        networks:
-            - ztrus_net
-        command:
-            tail -f /dev/null
-        environment:
-            TZ: Asia/Bangkok
 
 networks:
     ztrus_net:

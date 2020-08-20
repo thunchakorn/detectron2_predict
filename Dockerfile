@@ -36,12 +36,19 @@ ENV TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST}"
 # Detectron2
 RUN python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 
-
 # Set a fixed model cache directory.
 ENV FVCORE_CACHE="/tmp"
 WORKDIR /app/
 
-COPY ./ ./
+# Set a path to weight directory
+ENV WEIGHT_PATH="./weight/"
+
+COPY app.py ./
+COPY engine.py ./
+COPY run.py ./
+COPY README.md ./
+COPY requirements.txt ./
+
 # install requirements libraries for training
 RUN python -m pip install -r requirements.txt
 
